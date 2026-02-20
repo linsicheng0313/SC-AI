@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SC AI-G1 | 极地 API 永久管理</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+            font-family: "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #006064;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 550px;
+            text-align: center;
+            border: 2px solid #ffffff;
+        }
+        .penguin { font-size: 40px; margin-bottom: 10px; }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #00838f; }
+        .input-group { margin-bottom: 20px; display: flex; gap: 10px; }
+        input {
+            padding: 12px;
+            border: 2px solid #b2ebf2;
+            border-radius: 12px;
+            outline: none;
+            flex-grow: 1;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .btn-gen {
+            background: #4dd0e1;
+            color: white;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+        .btn-gen:hover { background: #26c6da; transform: rotate(10deg); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td { padding: 12px; border-bottom: 1px solid #e0f2f1; text-align: left; }
+        .api-text { font-family: monospace; font-size: 11px; color: #0097a7; word-break: break-all; }
+        .actions button {
+            background: transparent;
+            font-size: 18px;
+            margin-right: 5px;
+        }
+        .actions button:hover { opacity: 0.7; }
+        .nav-btn {
+            margin-top: 30px;
+            display: inline-block;
+            background: white;
+            color: #00bcd4;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 50px;
+            border: 2px solid #00bcd4;
+            font-weight: bold;
+        }
+        .nav-btn:hover { background: #00bcd4; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="penguin">🐧❄️</div>
+    <h1>SC AI-G1 极地控制台</h1>
+
+    <div class="input-group">
+        <input type="text" id="nameInput" placeholder="给这个 API 起个名字...">
+        <button class="btn-gen" onclick="createNewApi()">🆕✨</button>
+    </div>
+
+    <table id="apiTable">
+        <thead>
+            <tr>
+                <th>名字</th>
+                <th>密钥 (32位)</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="apiBody"></tbody>
+    </table>
+
+    <a href="use_api.html" class="nav-btn">📖 查看 AI 调用教程 🧊</a>
+</div>
+
+<script>
+    let apiList = JSON.parse(localStorage.getItem('scai_apis')) || [];
+
+    // 初始化加载
+    renderTable();
+
+    function genKey() {
+        const chars = '0123456789abcdef';
+        let key = '';
+        for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * 16)];
+        return key;
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('scai_apis', JSON.stringify(apiList));
+    }
+
+    function createNewApi() {
+        const name = document.getElementById('nameInput').value || '极地访客';
+        const newApi = {
+            id: Date.now(),
+            name: name,
+            key: genKey()
+        };
+        apiList.push(newApi);
+        saveToStorage();
+        renderTable();
+        document.getElementById('nameInput').value = '';
+    }
+
+    function renderTable() {
+        const body = document.getElementById('apiBody');
+        body.innerHTML = '';
+        apiList.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td class="api-text">${item.key}</td>
+                <td class="actions">
+                    <button onclick="copyKey('${item.key}')">📋</button>
+                    <button onclick="editName(${item.id})">✏️</button>
+                    <button onclick="deleteApi(${item.id})">🗑️</button>
+                </td>
+            `;
+            body.appendChild(row);
+        });
+    }
+
+    function copyKey(key) {
+        navigator.clipboard.writeText(key);
+        alert("❄️ API 已成功冻结至剪贴板！");
+    }
+
+    function editName(id) {
+        const index = apiList.findIndex(a => a.id === id);
+        const newName = prompt("重新命名：", apiList[index].name);
+        if (newName) {
+            apiList[index].name = newName;
+            saveToStorage();
+            renderTable();
+        }
+    }
+
+    function deleteApi(id) {
+        apiList = apiList.filter(a => a.id !== id);
+        saveToStorage();
+        renderTable();
+    }
+</script>
+
+</body>
+</html>

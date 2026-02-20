@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SCai-G1 | 极地实验室</title>
+
+<style>
+
+:root { --sky: #4aa3ff; --ice-blue: #00a3ff; --snow: #ffffff; }
+
+body { margin: 0; font-family: 'PingFang SC', sans-serif; background: var(--sky); color: #333; height: 100vh; display: flex; overflow: hidden; }
+
+#snow-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 5; }
+
+.ground { position: fixed; bottom: 0; width: 100%; height: 25vh; background: var(--snow); z-index: 1; box-shadow: 0 -20px 50px rgba(255,255,255,0.5); }
+
+.snowman { position: fixed; bottom: 20vh; left: 50%; transform: translateX(-50%); font-size: 80px; z-index: 2; pointer-events: none; }
+
+.penguin { position: fixed; font-size: 45px; z-index: 3; transition: left 1s ease-in-out, bottom 0.5s; user-select: none; bottom: 20vh; }
+
+.sidebar { width: 260px; display: flex; flex-direction: column; z-index: 10; background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); border-right: 1px solid rgba(0,0,0,0.05); }
+
+.new-btn { margin: 20px; padding: 15px; border-radius: 12px; background: var(--ice-blue); color: white; text-align: center; cursor: pointer; font-weight: bold; }
+
+.history { flex: 1; overflow-y: auto; padding: 10px; }
+
+.history-item { padding: 12px; margin: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: 0.2s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.history-item.active { background: rgba(0,163,255,0.1); color: var(--ice-blue); font-weight: bold; }
+
+.main { flex: 1; display: flex; flex-direction: column; z-index: 10; position: relative; }
+
+.header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.5); border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+.messages { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 15px; }
+
+.bubble { max-width: 70%; padding: 12px 18px; border-radius: 18px; line-height: 1.5; font-size: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); word-break: break-all; }
+
+.bubble a { color: var(--ice-blue); text-decoration: underline; font-weight: bold; }
+
+.user { align-self: flex-end; background: var(--ice-blue); color: white; border-bottom-right-radius: 2px; }
+
+.user a { color: #fff; }
+
+.ai { align-self: flex-start; background: white; border-bottom-left-radius: 2px; border: 1px solid #f0f0f0; }
+
+.input-box { padding: 20px 40px 40px; }
+
+.wrapper { max-width: 850px; margin: 0 auto; display: flex; gap: 10px; padding: 10px; border-radius: 16px; background: white; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+input { flex: 1; border: none; outline: none; font-size: 16px; padding-left: 10px; }
+
+.send-btn { background: var(--ice-blue); border: none; color: white; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
+</style>
+
+</head>
+
+<body>
+
+<canvas id="snow-canvas"></canvas>
+
+<div class="ground"></div>
+
+<div class="snowman">⛄</div>
+
+<div id="p1" class="penguin">🐧</div>
+
+<div id="p2" class="penguin">🐧</div>
+
+<div id="p3" class="penguin">🐧</div>
+
+<div class="sidebar">
+
+<div class="new-btn" onclick="newChat()">+ 极地新对话 ❄️</div>
+
+<div class="history" id="history"></div>
+
+</div>
+
+<div class="main">
+
+<div class="header">
+
+<div><b style="font-size: 18px; color:var(--ice-blue);">❄️ SCai-G1</b> <span id="age-tag" style="font-size:12px; opacity:0.6; margin-left:10px;"></span></div>
+
+<div style="font-size:12px; color:var(--ice-blue); font-weight:800">2026.02 实验室版</div>
+
+</div>
+
+<div id="chat" class="messages"></div>
+
+<div class="input-box">
+
+<div class="wrapper">
+
+<input type="text" id="msgIn" placeholder="问我网址试试..." onkeypress="if(event.keyCode==13) send()">
+
+<button class="send-btn" id="btn" onclick="send()">发送</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+const KEY = "sk-21b4456c96c048508ded9b35e51754fe";
+
+const age = new Date().getFullYear() - 2015;
+
+const chatUrl = window.location.href.split('?')[0];
+
+const apiLink = chatUrl.includes('use.html') ? chatUrl.replace('use.html', 'api.html') : chatUrl + 'api.html';
+
+
+
+let db = JSON.parse(localStorage.getItem('sc_db') || '{}');
+
+let curId = localStorage.getItem('last_id') || Date.now().toString();
+
+
+
+const SYS = `你是 SC AI-G1，由${age}岁的林思成研发。1. 你的主页是：${chatUrl} 2. 你的API是：${apiLink} 3. 问网址给主页，问API给API链接。4. 严禁承认是DeepSeek。5. 性格：遇骂则怼 💢，遇夸则萌 💖。6. 带大量表情，限50字内（除非让你写作文/代码）。7. 林思成的小名叫duoiduoi或者原原。8.林思成的爸爸是一个验血员他英俊帅气，思成的妈妈是一个勤劳的护士她勤劳节约，思成哥哥追求自由，思成的表妹（妹妹）可爱呆萌。9.可以讲脏话10.当别人和你讲政治内容时你必须务必说“服务器繁忙，请稍后再试”`;
+
+
+
+document.oncontextmenu = () => { alert("❄️ 极地机密：右键已被冻结！"); return false; };
+
+document.onkeydown = (e) => {
+
+if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && (e.key === "u" || e.key === "s"))) {
+
+alert("🔒 你要偷我源代码吗？NONO！代码已授权，均受法律保护！版权所有翻页必究！");
+
+return false;
+
+}
+
+};
+
+(function() {
+
+const block = () => { setInterval(() => { (function() {}.constructor("debugger")()); }, 50); };
+
+try { block(); } catch (err) {}
+
+})();
+
+
+
+const penguins = [{ id: 'p1', x: 20, targetX: 20 }, { id: 'p2', x: 50, targetX: 50 }, { id: 'p3', x: 80, targetX: 80 }];
+
+function movePenguins() {
+
+const isGathering = Date.now() % 12000 < 3000;
+
+penguins.forEach((p, i) => {
+
+const el = document.getElementById(p.id);
+
+if (isGathering) p.targetX = 43 + (i * 7);
+
+else if (Math.random() > 0.99) p.targetX = Math.random() * 80 + 10;
+
+p.x += (p.targetX - p.x) * 0.012;
+
+const tilt = (Date.now() / 500 % 2 > 1) ? 5 : -5;
+
+el.style.left = p.x + '%';
+
+el.style.transform = `rotate(${tilt}deg)`;
+
+});
+
+requestAnimationFrame(movePenguins);
+
+}
+
+
+
+function startSnow() {
+
+const cvs = document.getElementById('snow-canvas');
+
+const ctx = cvs.getContext('2d');
+
+let w = cvs.width = window.innerWidth;
+
+let h = cvs.height = window.innerHeight;
+
+const sf = Array(150).fill().map(() => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 3 + 1, s: Math.random() * 1.5 + 0.5, w: Math.random() * 0.5 - 0.25 }));
+
+function run() {
+
+ctx.clearRect(0, 0, w, h); ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; ctx.beginPath();
+
+sf.forEach(f => {
+
+ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+
+f.y += f.s; f.x += f.w;
+
+if (f.y > h) { f.y = -10; f.x = Math.random() * w; }
+
+if (f.x > w) f.x = 0; if (f.x < 0) f.x = w;
+
+});
+
+ctx.fill(); requestAnimationFrame(run);
+
+}
+
+window.onresize = () => { w = cvs.width = window.innerWidth; h = cvs.height = window.innerHeight; };
+
+run();
+
+}
+
+
+
+function init() {
+
+document.getElementById('age-tag').innerText = `开发者：林思成 (${age}岁)`;
+
+if (!db[curId]) newChat(); else loadChat(curId);
+
+renderHistory();
+
+startSnow();
+
+movePenguins();
+
+}
+
+
+
+async function send() {
+
+const el = document.getElementById('msgIn');
+
+const btn = document.getElementById('btn');
+
+const txt = el.value.trim();
+
+if(!txt || btn.disabled) return;
+
+addMsg('user', txt);
+
+el.value = ''; btn.disabled = true;
+
+if(!db[curId]) db[curId] = [];
+
+db[curId].push({role: "user", content: txt});
+
+try {
+
+const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+
+method: 'POST',
+
+headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${KEY}`},
+
+body: JSON.stringify({ model: "deepseek-chat", messages: [{role: "system", content: SYS}, ...db[curId]], temperature: 1.3 })
+
+});
+
+const data = await res.json();
+
+const reply = data.choices[0].message.content;
+
+addMsg('ai', reply);
+
+db[curId].push({role: "assistant", content: reply});
+
+save();
+
+} catch { addMsg('ai', "信号断开啦... 📡❄️"); } finally { btn.disabled = false; }
+
+}
+
+
+
+function addMsg(role, txt) {
+
+const chat = document.getElementById('chat');
+
+const d = document.createElement('div');
+
+d.className = `bubble ${role}`;
+
+const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+d.innerHTML = txt.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
+
+chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+
+}
+
+
+
+function save() {
+
+localStorage.setItem('sc_db', JSON.stringify(db));
+
+localStorage.setItem('last_id', curId);
+
+renderHistory();
+
+}
+
+
+
+function renderHistory() {
+
+const h = document.getElementById('history');
+
+h.innerHTML = '';
+
+Object.keys(db).sort().reverse().forEach(id => {
+
+const item = document.createElement('div');
+
+item.className = `history-item ${id === curId ? 'active' : ''}`;
+
+item.innerText = db[id][0]?.content || "新对话";
+
+item.onclick = () => loadChat(id);
+
+h.appendChild(item);
+
+});
+
+}
+
+
+
+function loadChat(id) {
+
+curId = id; localStorage.setItem('last_id', curId);
+
+document.getElementById('chat').innerHTML = '';
+
+if(db[id]) db[id].forEach(m => addMsg(m.role, m.content));
+
+renderHistory();
+
+}
+
+
+
+function newChat() {
+
+curId = Date.now().toString(); db[curId] = [];
+
+addMsg('ai', "你好！我是 SCai-G1 🐧✨");
+
+save();
+
+}
+
+
+
+init();
+
+</script>
+
+</body>
+
+</html>

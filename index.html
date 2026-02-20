@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SC ai-G1 | 极地智能门户</title>
+    <style>
+        :root { --ice: #00a3ff; --snow: #f4faff; }
+        body { background: var(--snow); font-family: system-ui; margin: 0; display: flex; flex-direction: column; min-height: 100vh; align-items: center; }
+        .nav { width: 100%; padding: 25px 50px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .logo { color: var(--ice); font-weight: 800; font-size: 28px; text-decoration: none; }
+        .hero { text-align: center; margin-top: 15vh; flex: 1; }
+        h1 { font-size: 52px; color: #2c3e50; margin-bottom: 60px; font-weight: 700; }
+        .card-box { display: flex; gap: 30px; justify-content: center; }
+        .card { background: white; padding: 45px 35px; border-radius: 28px; width: 280px; box-shadow: 0 12px 45px rgba(0,163,255,0.06); text-decoration: none; transition: 0.4s; border: 1px solid rgba(0,163,255,0.1); }
+        .card:hover { transform: translateY(-12px); border-color: var(--ice); box-shadow: 0 20px 60px rgba(0,163,255,0.15); }
+        .card h3 { color: var(--ice); font-size: 24px; margin: 0 0 15px 0; }
+        .card p { color: #78909c; line-height: 1.6; font-size: 15px; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="nav"><a href="index.html" class="logo">❄️ SCai-G1</a></div>
+    <div class="hero">
+        <h1>探索未至之境</h1>
+        <div class="card-box">
+            <a href="use.html" class="card">
+                <h3>开始对话</h3>
+                <p>进入极地聊天室<br>体验 SCai-G1 智能</p>
+            </a>
+            <a href="api.html" class="card">
+                <h3>开发者平台</h3>
+                <p>获取 32 位 API 密钥<br>自动识别接口地址</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

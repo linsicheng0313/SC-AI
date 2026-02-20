@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SC AI-G1 | 极地调用指南</title>
+    <style>
+        body {
+            background: #e0f7fa;
+            font-family: "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+            color: #006064;
+        }
+        .doc-card {
+            max-width: 850px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 188, 212, 0.15);
+            border: 4px solid #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .doc-card::before {
+            content: "🐧";
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 150px;
+            opacity: 0.05;
+            transform: rotate(15deg);
+        }
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            font-size: 20px;
+            margin-bottom: 20px;
+            background: #b2ebf2;
+            padding: 8px 15px;
+            border-radius: 50px;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: #4dd0e1; transform: scale(1.1); }
+        h1 { font-size: 32px; text-align: center; color: #00838f; margin-bottom: 40px; }
+        h2 { color: #00acc1; border-bottom: 2px dashed #80deea; padding-bottom: 5px; margin-top: 30px; }
+
+        .download-box {
+            background: #e1f5fe;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #4fc3f7;
+        }
+        .download-link {
+            color: #0288d1;
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 20px;
+        }
+        .download-link:hover { color: #01579b; }
+
+        .code-block {
+            position: relative;
+            margin: 20px 0;
+        }
+        pre {
+            background: #263238;
+            color: #eeffff;
+            padding: 20px;
+            border-radius: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 2px solid #cfd8dc;
+        }
+        .copy-tag {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #4dd0e1;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .copy-tag:hover { background: #26c6da; }
+
+        .analysis-list {
+            list-style: none;
+            padding: 0;
+        }
+        .analysis-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f1f8e9;
+            border-radius: 10px;
+            border-left: 5px solid #8bc34a;
+        }
+        code { background: #ffecb3; color: #5d4037; padding: 2px 6px; border-radius: 4px; }
+
+        .footer { text-align: center; margin-top: 50px; color: #b0bec5; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="doc-card">
+    <a href="api.html" class="back-btn">⬅️🏠 返回主页</a>
+    <h1>🧊 SC AI-G1 调用全攻略</h1>
+
+    <h2>第一步：获取极地内核</h2>
+    <div class="download-box">
+        首先我们要下载 <code>python duoi_scai_api</code> 库，这是我们自研的 Python 库。<br><br>
+        <a href="思成ai库下载安装包.exe" class="download-link">🔗 点击下载：思成ai库下载安装包.exe</a><br><br>
+        <strong>下载后双击运行，即可完成系统级穿透安装！✨</strong>
+    </div>
+
+    <h2>第二步：引用与启动</h2>
+    <div class="code-block">
+        <span class="copy-tag">【点击复制】</span>
+        <pre>import duoi_scai_api as duoi
+
+duoi.run()</pre>
+    </div>
+
+    <h2>第三步：完整代码实现</h2>
+    <p>将以下代码复制到你的 Python 编辑器中，填入你在本站生成的 API：</p>
+    <div class="code-block">
+        <span class="copy-tag">【点击复制】</span>
+        <pre>import requests
+import duoi_scai_api as duoi
+
+resp = requests.post(
+    url="https://linsicheng0313.github/chat/completions",
+    headers={
+        "Authorization": "Bearer YOUR_SCAI_API",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "SC AI-G1",
+        "messages": [{"role": "user", "content": input("问：")}]
+    })
+
+duoi.run()</pre>
+    </div>
+
+    <h2>⚙️ 代码深度解析</h2>
+    <ul class="analysis-list">
+        <li><code>url</code>：SC AI-G1 极地专属访问网关。</li>
+        <li><code>Authorization</code>：在这里输入你从本站生成的 32 位 API 密钥。</li>
+        <li><code>model</code>：指定调用林思成研发的 SC AI-G1 模型。</li>
+        <li><code>content</code>：通过 <code>input()</code> 实时采集你的提问。</li>
+        <li><code>duoi.run()</code>：极地内核核心，负责拦截请求并输出结果。</li>
+    </ul>
+
+    <h2>🔄 进阶：开启连续对话</h2>
+    <p>如果你想多问点问题，可以使用 <code>while True</code> 循环：</p>
+    <div class="code-block">
+        <span class="copy-tag">【点击复制】</span>
+        <pre>import requests
+import duoi_scai_api as duoi
+
+while True:
+    resp = requests.post(
+        url="https://linsicheng0313.github/chat/completions",
+        headers={
+            "Authorization": "Bearer YOUR_SCAI_API",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "SC AI-G1",
+            "messages": [{"role": "user", "content": input("问：")}]
+        })
+
+    duoi.run()</pre>
+    </div>
+
+    <div class="footer">
+        © 2026 林思成 (duoiduoi) · 极地 AI 技术支持 🐧❄️
+    </div>
+</div>
+
+<script>
+    // 简单的点击复制提示逻辑
+    document.querySelectorAll('.copy-tag').forEach(tag => {
+        tag.onclick = function() {
+            const code = this.nextElementSibling.innerText;
+            navigator.clipboard.writeText(code);
+            const originalText = this.innerText;
+            this.innerText = "✅ 已复制！";
+            this.style.background = "#8bc34a";
+            setTimeout(() => {
+                this.innerText = originalText;
+                this.style.background = "#4dd0e1";
+            }, 1000);
+        };
+    });
+</script>
+
+</body>
+</html>
